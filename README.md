@@ -18,7 +18,9 @@ A self-hosted QR code scavenger hunt platform for live events. Participants scan
 - Generate print-ready QR code sheets per event
 - Monitor participation live via hunter and checkpoint dashboards
 - Adjust points manually and manage participant sessions
+- Manage additional admin accounts from the Settings page — no server access required
 - Secure login with email 2FA and auto-expiring sessions
+- Logged-in account email displayed in the admin header on every page
 
 ---
 
@@ -78,6 +80,8 @@ pnpm build && pnpm start
 
 Open `http://localhost:3000/admin/setup` in your browser to enrol the first administrator. The setup page locks itself after the first account is created.
 
+Additional admin accounts can be created from **Admin → Settings → Admin Accounts** once you are logged in. Adding an account automatically adds that email to the enrolment whitelist; removing an account removes it from the whitelist. No server access or CLI scripts are needed for day-to-day admin management.
+
 ---
 
 ## Environment Variables
@@ -128,8 +132,9 @@ Open `http://localhost:3000/admin/setup` in your browser to enrol the first admi
 
 - Admin login requires email + password followed by a 6-digit OTP sent to the registered email address
 - Sessions are stored in the database and expire after 8 hours of inactivity
+- The enrolment whitelist is stored in the database at runtime — `ADMIN_ALLOWED_EMAILS` in `.env` is only used as a bootstrap fallback before any accounts exist
+- Additional admins are managed from the Settings page; adding or removing an account keeps the whitelist in sync automatically
 - Rotate `ADMIN_SECRET` before deploying to a public server (`pnpm generate-secret`)
-- Set `ADMIN_ALLOWED_EMAILS` to restrict who can enrol as an administrator
 - Serve the application over HTTPS in any internet-facing deployment
 
 ---
