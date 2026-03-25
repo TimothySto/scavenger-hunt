@@ -12,6 +12,7 @@ export type CheckpointRow = {
   type: string
   points: number
   clue: string | null
+  fallbackUrl: string | null
   contentJson: Record<string, unknown> | null
 }
 
@@ -20,6 +21,7 @@ type Props = {
   completedIds: string[]
   eventSlug: string
   primaryColor: string
+  conversionBonusPoints: number
 }
 
 // ─── shared label map ─────────────────────────────────────────────────────────
@@ -54,7 +56,7 @@ function ChevronRight({ className }: { className?: string }) {
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-export default function CheckpointList({ checkpoints, completedIds: completedArr, eventSlug, primaryColor }: Props) {
+export default function CheckpointList({ checkpoints, completedIds: completedArr, eventSlug, primaryColor, conversionBonusPoints }: Props) {
   const completedIds = new Set(completedArr)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
@@ -137,9 +139,16 @@ export default function CheckpointList({ checkpoints, completedIds: completedArr
                 </div>
               </div>
 
-              {/* Points + right chevron when linkable-and-expanded */}
+              {/* Points + optional bonus + right chevron when linkable-and-expanded */}
               <div className="flex-shrink-0 flex items-center gap-1.5">
-                <span className="text-sm font-semibold text-gray-700">{cp.points} pts</span>
+                <div className="text-right">
+                  <span className="text-sm font-semibold text-gray-700">{cp.points} pts</span>
+                  {conversionBonusPoints > 0 && cp.fallbackUrl && !done && (
+                    <div className="text-xs text-cyan-500 font-medium leading-none mt-0.5">
+                      +{conversionBonusPoints} bonus
+                    </div>
+                  )}
+                </div>
                 {showCyan && (
                   <ChevronRight className="w-4 h-4 text-cyan-500" />
                 )}

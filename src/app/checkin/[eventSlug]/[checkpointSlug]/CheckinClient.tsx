@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { recordCheckin, recordConversion, type CheckinStatus } from './actions'
 
@@ -41,9 +41,14 @@ export default function CheckinClient({
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
   const [redirected, setRedirected] = useState(false)
 
+  // Guard against React Strict Mode double-invocation firing the check-in twice,
+  // which would cause 'already-checked-in' to show on every genuine first visit.
+  const hasCheckedIn = useRef(false)
+
   // Auto check-in on mount (skipped in preview)
   useEffect(() => {
-    if (isPreview) return
+    if (isPreview || hasCheckedIn.current) return
+    hasCheckedIn.current = true
     recordCheckin(eventId, checkpointId).then(setStatus)
   }, [eventId, checkpointId, isPreview])
 

@@ -3,6 +3,7 @@
 import { db } from '@/lib/db'
 import { SESSION_COOKIE_NAME } from '@/lib/session'
 import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 
 export type CheckinStatus = 'ok' | 'already-checked-in' | 'disabled' | 'no-session' | 'hunt-ended' | 'error'
 export type CompleteStatus = 'ok' | 'already-completed' | 'no-session'
@@ -74,6 +75,8 @@ export async function recordConversion(
           reason: 'Conversion bonus',
         },
       })
+      // Bust the participant homepage cache so the updated score is shown on return
+      revalidatePath(`/event/${event.slug}/home`)
     }
   }
 }

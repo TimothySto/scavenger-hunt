@@ -56,7 +56,11 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
   const checkpoints = event.checkpoints.filter((cp) => cp.type !== 'PRIZE_REDEMPTION')
   const completedIds = new Set(session?.checkIns.map((c) => c.checkpointId) ?? [])
   const totalPoints = session ? computeScore(session.checkIns, session.adjustments) : 0
-  const possiblePoints = checkpoints.reduce((sum, cp) => sum + cp.points, 0)
+  const conversionBonusPoints = event.conversionBonusPoints ?? 0
+  const possiblePoints = checkpoints.reduce((sum, cp) => {
+    const bonus = conversionBonusPoints > 0 && cp.fallbackUrl ? conversionBonusPoints : 0
+    return sum + cp.points + bonus
+  }, 0)
 
   const bgStyle = theme.homeBackgroundImage
     ? { backgroundImage: `url(${theme.homeBackgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -157,11 +161,13 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
               type: cp.type,
               points: cp.points,
               clue: cp.clue,
+              fallbackUrl: cp.fallbackUrl ?? null,
               contentJson: cp.contentJson as Record<string, unknown> | null,
             }))}
             completedIds={[...completedIds]}
             eventSlug={eventSlug}
             primaryColor={theme.primaryColor}
+            conversionBonusPoints={conversionBonusPoints}
           />
         </div>
 
