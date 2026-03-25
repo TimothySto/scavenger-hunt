@@ -2,6 +2,9 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { ADMIN_COOKIE_NAME } from '@/lib/adminAuth'
+import { validateAndRefreshSession } from '@/lib/adminSession'
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg',
@@ -20,6 +23,13 @@ const EXT_MAP: Record<string, string> = {
 }
 
 export async function POST(req: Request) {
+  // Require a valid admin session
+  const jar = await cookies()
+  const token = jar.get(ADMIN_COOKIE_NAME)?.value
+  if (!token || !(await validateAndRefreshSession(token))) {
+    return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  }
+
   const formData = await req.formData()
   const file = formData.get('file')
 
