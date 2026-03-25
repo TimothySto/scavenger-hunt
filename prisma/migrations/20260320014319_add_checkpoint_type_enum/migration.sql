@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "CheckpointType" AS ENUM ('ONSITE_SPONSOR', 'OFFSITE_SPONSOR', 'EXHIBIT', 'ONLINE_ONLY', 'PRIZE_REDEMPTION');
+
+-- AlterTable
+ALTER TABLE "Checkpoint" ADD COLUMN     "type" "CheckpointType" NOT NULL DEFAULT 'ONSITE_SPONSOR';

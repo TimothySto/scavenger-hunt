@@ -1,0 +1,203 @@
+{
+  "event": {
+    "name": "My Scavenger Hunt",
+    "slug": "my-scavenger-hunt-2026",
+    "description": "Welcome to the hunt! Collect points by visiting checkpoints across the venue.",
+    "logoUrl": null,
+    "isActive": true
+  },
+  "checkpoints": [
+
+
+    {
+      "_template": "ONSITE_SPONSOR — minimal",
+      "name": "Acme Corp",
+      "type": "ONSITE_SPONSOR",
+      "points": 10,
+      "isActive": true
+    },
+    {
+      "_template": "ONSITE_SPONSOR — maximal",
+      "name": "Acme Corp",
+      "slug": "acme-corp",
+      "type": "ONSITE_SPONSOR",
+      "points": 10,
+      "clue": "Find us near the main entrance on the left.",
+      "fallbackUrl": "https://www.acmecorp.example.com",
+      "isActive": true,
+      "contentJson": {
+        "sponsorLogo": "https://www.acmecorp.example.com/logo.png",
+        "backgroundImage": "https://www.acmecorp.example.com/booth-bg.jpg",
+        "blurb": "Thanks for stopping by the Acme Corp booth! We build the best widgets in the business.",
+        "showTag": true
+      }
+    },
+
+
+    {
+      "_template": "OFFSITE_SPONSOR — minimal",
+      "name": "Globex Industries",
+      "type": "OFFSITE_SPONSOR",
+      "points": 10,
+      "isActive": true
+    },
+    {
+      "_template": "OFFSITE_SPONSOR — maximal",
+      "name": "Globex Industries",
+      "slug": "globex-industries",
+      "type": "OFFSITE_SPONSOR",
+      "points": 10,
+      "clue": "Check the sponsor booklet you received at registration.",
+      "fallbackUrl": "https://www.globex.example.com",
+      "isActive": true,
+      "contentJson": {
+        "sponsorLogo": "https://www.globex.example.com/logo.png",
+        "backgroundImage": "https://www.globex.example.com/bg.jpg",
+        "blurb": "Globex — powering tomorrow's solutions today.",
+        "showTag": false
+      }
+    },
+
+
+    {
+      "_template": "EXHIBIT — minimal",
+      "name": "The Solar System",
+      "type": "EXHIBIT",
+      "points": 15,
+      "isActive": true
+    },
+    {
+      "_template": "EXHIBIT — maximal (standard, no question)",
+      "name": "The Solar System",
+      "slug": "solar-system",
+      "type": "EXHIBIT",
+      "points": 15,
+      "clue": "Located in the east wing, room 3B.",
+      "isActive": true,
+      "contentJson": {
+        "backgroundImage": "https://assets.example.com/solar-system.jpg",
+        "blurb": "Our solar system formed approximately 4.6 billion years ago.",
+        "showTag": true
+      }
+    },
+    {
+      "_template": "EXHIBIT — maximal (with question, homepage link enabled)",
+      "name": "The Solar System",
+      "slug": "solar-system-quiz",
+      "type": "EXHIBIT",
+      "points": 15,
+      "clue": "Located in the east wing, room 3B.",
+      "isActive": true,
+      "contentJson": {
+        "backgroundImage": "https://assets.example.com/solar-system.jpg",
+        "blurb": "Read the exhibit panel, then answer the question below.",
+        "question": "How many planets are in our solar system?",
+        "correctAnswer": "8",
+        "answerChoices": ["6", "7", "8", "9"],
+        "questionMode": true,
+        "showTag": true
+      }
+    },
+
+
+    {
+      "_template": "EXHIBIT_QUESTION — minimal",
+      "name": "History Quiz",
+      "type": "EXHIBIT_QUESTION",
+      "points": 20,
+      "isActive": true,
+      "contentJson": {
+        "question": "In what year was the venue first opened?",
+        "correctAnswer": "1987"
+      }
+    },
+    {
+      "_template": "EXHIBIT_QUESTION — maximal",
+      "name": "History Quiz",
+      "slug": "history-quiz",
+      "type": "EXHIBIT_QUESTION",
+      "points": 20,
+      "clue": "Think about what was here before the current building.",
+      "isActive": true,
+      "contentJson": {
+        "backgroundImage": "https://assets.example.com/history-bg.jpg",
+        "blurb": "Test your knowledge of our venue's history.",
+        "question": "In what year was this venue first opened to the public?",
+        "correctAnswer": "1987",
+        "answerChoices": ["1972", "1981", "1987", "1995"],
+        "showTag": true
+      }
+    },
+
+
+    {
+      "_template": "ONLINE_ONLY — minimal",
+      "name": "Digital Partner",
+      "type": "ONLINE_ONLY",
+      "points": 5,
+      "isActive": true
+    },
+    {
+      "_template": "ONLINE_ONLY — maximal",
+      "name": "Digital Partner",
+      "slug": "digital-partner",
+      "type": "ONLINE_ONLY",
+      "points": 5,
+      "clue": "Visit our website and explore what we do.",
+      "fallbackUrl": "https://www.digitalpartner.example.com",
+      "isActive": true,
+      "contentJson": {
+        "sponsorLogo": "https://www.digitalpartner.example.com/logo.png",
+        "backgroundImage": "https://www.digitalpartner.example.com/bg.jpg",
+        "blurb": "Thanks for clicking through! Check out our latest products.",
+        "showTag": true
+      }
+    },
+
+
+    {
+      "_template": "PRIZE_REDEMPTION — minimal",
+      "name": "Prize Desk",
+      "type": "PRIZE_REDEMPTION",
+      "points": 0,
+      "isActive": true
+    },
+    {
+      "_template": "PRIZE_REDEMPTION — maximal",
+      "name": "Prize Desk",
+      "slug": "prize-desk",
+      "type": "PRIZE_REDEMPTION",
+      "points": 0,
+      "isActive": true,
+      "contentJson": {
+        "prizeInstructions": "Show this screen to a volunteer at the prize desk. Prizes are awarded based on your final score tier. Top 3 scores receive a grand prize!",
+        "showTag": false
+      }
+    },
+
+   
+
+    {
+      "_template": "EVENT_GENERAL — minimal",
+      "name": "Welcome Table",
+      "type": "EVENT_GENERAL",
+      "points": 5,
+      "isActive": true
+    },
+    {
+      "_template": "EVENT_GENERAL — maximal",
+      "name": "Welcome Table",
+      "slug": "welcome-table",
+      "type": "EVENT_GENERAL",
+      "points": 5,
+      "clue": "Start here! We're at the front entrance.",
+      "isActive": true,
+      "contentJson": {
+        "backgroundImage": "https://assets.example.com/welcome-bg.jpg",
+        "blurb": "Welcome to the hunt! Grab a programme and get scanning.",
+        "showTag": false
+      }
+    }
+
+  ]
+}

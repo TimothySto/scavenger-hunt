@@ -1,0 +1,47 @@
+{
+  "name": "scavenger-hunt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed": "tsx prisma/seed.ts",
+    "reset-admin": "tsx prisma/reset-admin.ts",
+    "generate-secret": "tsx prisma/scripts/generate-secret.ts",
+    "whitelist-add": "tsx prisma/scripts/whitelist-add.ts",
+    "whitelist-remove": "tsx prisma/scripts/whitelist-remove.ts",
+    "smtp-setup": "tsx prisma/scripts/smtp-setup.ts",
+    "db-setup": "tsx prisma/scripts/db-setup.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.5.0",
+    "@prisma/client": "^7.5.0",
+    "@types/qrcode": "^1.5.6",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "next": "16.2.0",
+    "nodemailer": "^8.0.3",
+    "pg": "^8.20.0",
+    "prisma": "^7.5.0",
+    "qrcode": "^1.5.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/node": "^20",
+    "@types/nodemailer": "^7.0.11",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

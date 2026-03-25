@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: scavenger_hunt_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scavenger_admn
+      POSTGRES_PASSWORD: scavengerpass_tmp
+      POSTGRES_DB: scavenger_hunt
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

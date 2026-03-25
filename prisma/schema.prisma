@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ConversionType {
+  AUTO
+  MANUAL
+}
+
+enum CheckpointType {
+  ONSITE_SPONSOR
+  OFFSITE_SPONSOR
+  EXHIBIT
+  EXHIBIT_QUESTION
+  ONLINE_ONLY
+  PRIZE_REDEMPTION
+  EVENT_GENERAL
+}
+
+model Event {
+  id                    String       @id @default(cuid())
+  name                  String
+  slug                  String       @unique
+  description           String?
+  logoUrl               String?
+  styleJson             Json?
+  isActive              Boolean      @default(true)
+  conversionBonusPoints Int          @default(0)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  checkpoints Checkpoint[]
+  sessions    ParticipantSession[]
+}
+
+model Checkpoint {
+  id            String         @id @default(cuid())
+  eventId       String
+  name          String
+  slug          String
+  qrCodeValue   String         @unique
+  type          CheckpointType @default(ONSITE_SPONSOR)
+  points        Int            @default(0)
+  clue          String?
+  contentJson   Json?
+  fallbackUrl   String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  event       Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  checkIns    CheckIn[]
+  conversions CheckpointConversion[]
+
+  @@unique([eventId, slug])
+}
+
+model ParticipantSession {
+  id          String    @id @default(cuid())
+  eventId     String
+  cookieId    String
+  displayName String?
+  completedAt DateTime?
+  isEnabled   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  event       Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  checkIns    CheckIn[]
+  adjustments ManualPointAdjustment[]
+  conversions CheckpointConversion[]
+
+  @@unique([eventId, cookieId])
+}
+
+model ManualPointAdjustment {
+  id        String   @id @default(cuid())
+  sessionId String
+  points    Int
+  reason    String?
+  createdAt DateTime @default(now())
+
+  session ParticipantSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model AdminSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAccount {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions     AdminSession[]
+  pendingCodes AdminPendingCode[]
+}
+
+model AdminSession {
+  id             String       @id @default(cuid())
+  adminAccountId String
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  lastActiveAt   DateTime     @default(now())
+
+  account AdminAccount @relation(fields: [adminAccountId], references: [id], onDelete: Cascade)
+}
+
+model AdminPendingCode {
+  id             String       @id @default(cuid())
+  adminAccountId String
+  codeHash       String
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+
+  account AdminAccount @relation(fields: [adminAccountId], references: [id], onDelete: Cascade)
+}
+
+model CheckpointConversion {
+  id           String         @id @default(cuid())
+  sessionId    String
+  checkpointId String
+  type         ConversionType
+  createdAt    DateTime       @default(now())
+
+  session    ParticipantSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint         @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, checkpointId, type])
+}
+
+model CheckIn {
+  id                   String   @id @default(cuid())
+  participantSessionId String
+  checkpointId         String
+  checkedInAt          DateTime @default(now())
+
+  participantSession ParticipantSession @relation(fields: [participantSessionId], references: [id], onDelete: Cascade)
+  checkpoint         Checkpoint         @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@unique([participantSessionId, checkpointId])
+}
