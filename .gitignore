@@ -43,7 +43,7 @@ next-env.d.ts
 .claude
 claude.log
 CLAUDE.md
-README.md
+README_Node.md
 
 /src/generated/prisma
 CLAUDE.md
