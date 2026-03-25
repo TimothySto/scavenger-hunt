@@ -7,7 +7,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function joinHunt(eventId: string, eventSlug: string, next: string | null, formData: FormData) {
-  const displayName = String(formData.get('displayName') ?? '').trim() || null
+  const displayName = String(formData.get('displayName') ?? '').trim().slice(0, 64) || null
 
   const cookieStore = await cookies()
   let cookieId = cookieStore.get(SESSION_COOKIE_NAME)?.value
