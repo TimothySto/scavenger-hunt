@@ -37,12 +37,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <>
       <header className="flex items-center justify-between px-6 py-3 border-b bg-white text-sm">
-        <span className="font-semibold text-gray-700">
+        <Link href="/admin" className="font-semibold text-gray-700 hover:text-black transition-colors">
           Scavenger Hunt Admin
           {accountEmail && (
             <span className="ml-2 font-normal text-gray-400">— {accountEmail}</span>
           )}
-        </span>
+        </Link>
         <div className="flex items-center gap-5">
           <Link href="/admin/settings" className="text-gray-500 hover:text-gray-900 transition-colors">
             Settings
