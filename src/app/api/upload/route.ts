@@ -41,6 +41,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
   }
 
+  const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: 'File too large (max 5 MB)' }, { status: 400 })
+  }
+
   const eventId = formData.get('eventId')?.toString() ?? ''
 
   // Prevent path traversal — cuid/alphanumeric only

@@ -46,4 +46,8 @@ CLAUDE.md
 README_Node.md
 
 /src/generated/prisma
+
+# Uploaded event assets — kept locally and on the server, not in the repo
+/public/uploads/**
+!/public/uploads/.gitkeep
 CLAUDE.md
