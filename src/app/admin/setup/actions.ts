@@ -3,15 +3,7 @@
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { hashPassword } from '@/lib/adminPassword'
-
-function isEmailAllowed(email: string): boolean {
-  const whitelist = process.env.ADMIN_ALLOWED_EMAILS
-  if (!whitelist) return true // No restriction configured
-  return whitelist
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .includes(email)
-}
+import { isEmailAllowed } from '@/lib/adminWhitelist'
 
 export async function createAccount(formData: FormData) {
   const email    = formData.get('email')?.toString().trim().toLowerCase() ?? ''
@@ -24,7 +16,7 @@ export async function createAccount(formData: FormData) {
     redirect('/admin/setup?error=exists')
   }
 
-  if (!isEmailAllowed(email)) {
+  if (!(await isEmailAllowed(email))) {
     redirect('/admin/setup?error=notallowed')
   }
 
