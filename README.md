@@ -38,7 +38,7 @@ A self-hosted QR code scavenger hunt platform for live events. Participants scan
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-org/scavenger-hunt.git
+git clone https://github.com/TimothySto/scavenger-hunt.git
 cd scavenger-hunt
 pnpm install
 ```

@@ -47,6 +47,9 @@ README_Node.md
 
 /src/generated/prisma
 
+# Personal deployment reference — contains server-specific paths and details
+docs/MY_DEPLOYMENT.md
+
 # Uploaded event assets — kept locally and on the server, not in the repo
 /public/uploads/**
 !/public/uploads/.gitkeep

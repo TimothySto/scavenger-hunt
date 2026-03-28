@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { createAccount } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 type Props = {
   searchParams: Promise<{ error?: string }>
 }
