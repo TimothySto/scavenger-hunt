@@ -7,6 +7,8 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import EventThemeStyle from '@/components/EventThemeStyle'
 import CheckpointList from './CheckpointList'
+import { InAppBrowserBanner } from '@/components/InAppBrowserBanner'
+import { QrScannerModal } from './QrScannerModal'
 
 type PageProps = {
   params: Promise<{ eventSlug: string }>
@@ -27,7 +29,7 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
     include: {
       checkpoints: {
         where: { isActive: true },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { order: 'asc' },
       },
     },
   })
@@ -53,7 +55,7 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
 
   const theme = parseEventStyle(event.styleJson)
 
-  const checkpoints = event.checkpoints.filter((cp) => cp.type !== 'PRIZE_REDEMPTION')
+  const checkpoints = event.checkpoints
   const completedIds = new Set(session?.checkIns.map((c) => c.checkpointId) ?? [])
   const totalPoints = session ? computeScore(session.checkIns, session.adjustments) : 0
   const conversionBonusPoints = event.conversionBonusPoints ?? 0
@@ -68,6 +70,7 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
 
   return (
     <div className="event-themed p-6" style={bgStyle}>
+      <InAppBrowserBanner />
       <EventThemeStyle style={theme} />
 
       <div className="max-w-2xl mx-auto space-y-6">
@@ -147,6 +150,11 @@ export default async function HuntHomePage({ params, searchParams }: PageProps) 
             </p>
           </div>
         </div>
+
+        {/* QR scanner */}
+        {!isPreview && (
+          <QrScannerModal eventSlug={eventSlug} primaryColor={theme.primaryColor} />
+        )}
 
         {/* Checkpoint list */}
         <div>

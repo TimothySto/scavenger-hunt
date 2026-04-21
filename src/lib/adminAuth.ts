@@ -26,8 +26,12 @@ async function getHmacKey(): Promise<CryptoKey> {
 export async function createSignedToken(id: string): Promise<string> {
   const key = await getHmacKey()
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(id))
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
-  return `${id}.${b64}`
+  // Use base64url (no +, /, or = chars) so the token is safe in cookies without percent-encoding
+  const b64url = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+  return `${id}.${b64url}`
 }
 
 export async function verifySignedToken(token: string): Promise<string | null> {
@@ -37,9 +41,11 @@ export async function verifySignedToken(token: string): Promise<string | null> {
     const id  = token.slice(0, dot)
     const sig = token.slice(dot + 1)
     const key = await getHmacKey()
-    const sigBytes = Uint8Array.from(atob(sig), (c) => c.charCodeAt(0))
+    // Decode base64url back to standard base64 before atob
+    const b64 = sig.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - sig.length % 4) % 4)
+    const sigBytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
     const ok = await crypto.subtle.verify(
-      'HMAC', key, sigBytes.buffer as ArrayBuffer,
+      'HMAC', key, sigBytes,
       new TextEncoder().encode(id)
     )
     return ok ? id : null

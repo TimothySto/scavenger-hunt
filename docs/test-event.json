@@ -1,0 +1,112 @@
+{
+  "event": {
+    "name": "Yuri's Night Test Hunt",
+    "slug": "test-hunt-2026",
+    "description": "A test scavenger hunt covering all checkpoint types. Not a real event — for deployment verification only.",
+    "isActive": true
+  },
+  "checkpoints": [
+    {
+      "_type": "EVENT_GENERAL",
+      "_note": "Welcome table — first stop, no link on homepage",
+      "name": "Mission Control",
+      "type": "EVENT_GENERAL",
+      "slug": "mission-control",
+      "points": 100,
+      "clue": "Every great mission starts with a briefing. Find the welcome table to get your launch codes.",
+      "contentJson": {
+        "blurb": "Welcome to Yuri's Night! Check in here to officially start your mission. Your score begins now.",
+        "showTag": true
+      }
+    },
+    {
+      "_type": "ONSITE_SPONSOR",
+      "_note": "Physical sponsor table with redirect — tests auto conversion flow",
+      "name": "Rocket Fuel Co.",
+      "type": "ONSITE_SPONSOR",
+      "slug": "rocket-fuel-co",
+      "points": 150,
+      "clue": "The crew runs on this stuff. Find their table near the bar.",
+      "fallbackUrl": "https://example.com/rocket-fuel",
+      "contentJson": {
+        "blurb": "Rocket Fuel Co. proudly powers the Yuri's Night crew. Scan to earn points and check out what they're pouring tonight.",
+        "conversionBonusPoints": 25
+      }
+    },
+    {
+      "_type": "OFFSITE_SPONSOR",
+      "_note": "QR code in printed materials — tests offsite sponsor flow",
+      "name": "Zero Gravity Apparel",
+      "type": "OFFSITE_SPONSOR",
+      "slug": "zero-gravity-apparel",
+      "points": 100,
+      "clue": "Check your event lanyard — there's a QR code hiding in plain sight.",
+      "fallbackUrl": "https://example.com/zero-gravity",
+      "contentJson": {
+        "blurb": "Zero Gravity Apparel — because your outfit should be as weightless as you feel tonight. Scan the code on your lanyard to visit their site.",
+        "conversionBonusPoints": 20
+      }
+    },
+    {
+      "_type": "EXHIBIT",
+      "_note": "Standard exhibit with optional question mode — tests EXHIBIT with question + homepage link",
+      "name": "The Apollo Display",
+      "type": "EXHIBIT",
+      "slug": "apollo-display",
+      "points": 200,
+      "clue": "Look for the historic mission display near the main stage.",
+      "contentJson": {
+        "blurb": "This exhibit commemorates the Apollo programme and the first humans to walk on the Moon.",
+        "question": "In what year did Apollo 11 land on the Moon?",
+        "correctAnswer": "1969",
+        "answerChoices": ["1967", "1969", "1971", "1973"],
+        "questionMode": true,
+        "showTag": true
+      }
+    },
+    {
+      "_type": "EXHIBIT_QUESTION",
+      "_note": "Always-question type — tests trivia flow, always shows link on homepage",
+      "name": "Cosmonaut Trivia",
+      "type": "EXHIBIT_QUESTION",
+      "slug": "cosmonaut-trivia",
+      "points": 250,
+      "clue": "No QR code needed — answer this from anywhere in the venue.",
+      "contentJson": {
+        "blurb": "Think you know your cosmonauts? Prove it.",
+        "question": "What is the name of the first human to travel to space?",
+        "correctAnswer": "Yuri Gagarin",
+        "answerChoices": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Valentina Tereshkova"],
+        "showTag": true
+      }
+    },
+    {
+      "_type": "ONLINE_ONLY",
+      "_note": "Homepage link only — tests online sponsor / social follow flow",
+      "name": "Follow Mission Control",
+      "type": "ONLINE_ONLY",
+      "slug": "follow-mission-control",
+      "points": 75,
+      "clue": "Stay in the loop — follow us online and earn your social explorer badge.",
+      "fallbackUrl": "https://yurisnight.net",
+      "contentJson": {
+        "blurb": "Follow Yuri's Night on social to stay connected with the global space community.",
+        "conversionBonusPoints": 10,
+        "showTag": true
+      }
+    },
+    {
+      "_type": "PRIZE_REDEMPTION",
+      "_note": "End of hunt — tests prize redemption and hunt completion flow",
+      "name": "Prize Deck",
+      "type": "PRIZE_REDEMPTION",
+      "slug": "prize-deck",
+      "points": 0,
+      "clue": "Bring your score to the prize desk to claim your reward. Safe travels, cosmonaut.",
+      "contentJson": {
+        "prizeInstructions": "Show this screen to the prize desk crew. They will verify your score and hand over your reward. Well done, cosmonaut — mission complete.",
+        "showTag": false
+      }
+    }
+  ]
+}

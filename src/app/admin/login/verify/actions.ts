@@ -31,6 +31,7 @@ export async function verifyOtp(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: SESSION_DURATION_MS / 1000,
+    secure: process.env.NODE_ENV === 'production',
   })
 
   redirect(from.startsWith('/admin') ? from : '/admin')

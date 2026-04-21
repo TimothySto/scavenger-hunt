@@ -37,11 +37,20 @@ export async function createCheckpoint(eventId: string, formData: FormData) {
   const showTagRaw        = formData.get('showTag')
   const showTag           = showTagRaw === 'false' ? false : null
 
+  const customTag          = String(formData.get('customTag')          ?? '').trim() || null
+  const acceptedAnswersRaw = String(formData.get('acceptedAnswers')    ?? '').trim()
+  const acceptedAnswers    = acceptedAnswersRaw
+    ? acceptedAnswersRaw.split('\n').map((s) => s.trim()).filter(Boolean)
+    : null
+  const enableQuestion     = formData.get('enableQuestion') === 'true' ? true : null
+
   const contentFields = {
     sponsorLogo, backgroundImage, blurb, prizeInstructions,
-    question, correctAnswer,
+    question, correctAnswer, customTag,
     ...(answerChoices && answerChoices.length > 0 ? { answerChoices } : {}),
+    ...(acceptedAnswers && acceptedAnswers.length > 0 ? { acceptedAnswers } : {}),
     ...(questionMode ? { questionMode } : {}),
+    ...(enableQuestion ? { enableQuestion } : {}),
     ...(showTag === false ? { showTag } : {}),
   }
   const hasContent = Object.values(contentFields).some((v) => v !== null)
@@ -55,8 +64,14 @@ export async function createCheckpoint(eventId: string, formData: FormData) {
   const slug = await uniqueCheckpointSlug(eventId, name)
   const qrCodeValue = `/checkin/${event.slug}/${slug}`
 
+  const maxOrderResult = await db.checkpoint.aggregate({
+    where: { eventId },
+    _max: { order: true },
+  })
+  const order = (maxOrderResult._max.order ?? -1) + 1
+
   const checkpoint = await db.checkpoint.create({
-    data: { eventId, name, slug, qrCodeValue, type, points, clue, fallbackUrl, contentJson, isActive },
+    data: { eventId, name, slug, qrCodeValue, type, points, clue, fallbackUrl, contentJson, isActive, order },
   })
 
   redirect(`/admin/events/${eventId}/checkpoints/${checkpoint.id}`)

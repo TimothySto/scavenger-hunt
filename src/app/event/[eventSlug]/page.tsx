@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { joinHunt } from './join/actions'
 import EventThemeStyle from '@/components/EventThemeStyle'
+import { InAppBrowserBanner } from '@/components/InAppBrowserBanner'
 
 type PageProps = {
   params: Promise<{ eventSlug: string }>
@@ -45,6 +46,7 @@ export default async function EventLandingPage({ params, searchParams }: PagePro
       className="event-themed min-h-screen flex items-center justify-center p-6"
       style={bgStyle}
     >
+      <InAppBrowserBanner />
       <EventThemeStyle style={theme} />
 
       <div className="w-full max-w-md">

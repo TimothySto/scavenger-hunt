@@ -24,7 +24,8 @@ export async function login(formData: FormData) {
 
   try {
     await sendOtpEmail(account.email, plainCode)
-  } catch {
+  } catch (err) {
+    console.error('[SMTP error]', err)
     redirect(`/admin/login?error=send&from=${encodeURIComponent(from)}`)
   }
 
@@ -35,6 +36,7 @@ export async function login(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: 10 * 60, // 10 minutes — matches OTP expiry
+    secure: process.env.NODE_ENV === 'production',
   })
 
   redirect(`/admin/login/verify?from=${encodeURIComponent(from)}`)

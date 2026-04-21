@@ -25,12 +25,15 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
   const [sponsorLogo, setSponsorLogo] = useState('')
   const [backgroundImage, setBackgroundImage] = useState('')
   const [questionMode, setQuestionMode] = useState(false)
+  const [enableQuestion, setEnableQuestion] = useState(false)
   const [showTag, setShowTag] = useState(true)
+  const [overrideTag, setOverrideTag] = useState(false)
   const [previewSlug, setPreviewSlug] = useState('')
 
-  const isExhibit         = checkpointType === 'EXHIBIT'
-  const isExhibitQuestion = checkpointType === 'EXHIBIT_QUESTION'
-  const hasQuestionSection = isExhibit || isExhibitQuestion
+  const isExhibit          = checkpointType === 'EXHIBIT'
+  const isExhibitQuestion  = checkpointType === 'EXHIBIT_QUESTION'
+  const isSponsor          = checkpointType === 'ONSITE_SPONSOR'
+  const hasQuestionSection = isExhibit || isExhibitQuestion || (isSponsor && enableQuestion)
 
   const action = createCheckpoint.bind(null, eventId)
 
@@ -38,6 +41,7 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
     formData.set('sponsorLogo', sponsorLogo)
     formData.set('backgroundImage', backgroundImage)
     formData.set('questionMode', questionMode ? 'true' : 'false')
+    formData.set('enableQuestion', enableQuestion ? 'true' : 'false')
     formData.set('showTag', showTag ? 'true' : 'false')
     await action(formData)
   }
@@ -114,6 +118,25 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
               />
             </div>
 
+            <div className="col-span-2 sm:col-span-1">
+              <label className="flex items-center gap-2 cursor-pointer mb-2">
+                <input
+                  type="checkbox"
+                  checked={overrideTag}
+                  onChange={(e) => setOverrideTag(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-medium">Override tag label</span>
+              </label>
+              {overrideTag && (
+                <input
+                  name="customTag"
+                  placeholder="e.g. Partner, Interactive, Exhibit…"
+                  className="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              )}
+            </div>
+
             <div className="col-span-2 flex items-center gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="isActive" defaultChecked className="h-4 w-4" />
@@ -128,6 +151,17 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
                 />
                 <span className="text-sm font-medium">Show type tag</span>
               </label>
+              {isSponsor && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enableQuestion}
+                    onChange={(e) => setEnableQuestion(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">Enable question on check-in</span>
+                </label>
+              )}
             </div>
           </div>
         </div>
@@ -173,16 +207,18 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
           </div>
         </div>
 
-        {/* Exhibit question — shown for EXHIBIT and EXHIBIT_QUESTION types */}
+        {/* Question section — EXHIBIT, EXHIBIT_QUESTION, and ONSITE_SPONSOR with enableQuestion */}
         {hasQuestionSection && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-5 space-y-4">
             <div>
               <h2 className="font-semibold text-blue-900">
-                {isExhibitQuestion ? 'Interactive Question' : 'Exhibit Question'}
+                {isExhibitQuestion ? 'Interactive Question' : isSponsor ? 'Sponsor Question' : 'Exhibit Question'}
               </h2>
               <p className="text-xs text-blue-700 mt-0.5">
                 {isExhibitQuestion
                   ? 'This checkpoint type always uses a question. Participants answer to earn points.'
+                  : isSponsor
+                  ? "Participants must answer correctly when they scan this checkpoint's QR code."
                   : 'Participants must answer correctly to earn points. Leave blank to use standard instant check-in.'}
               </p>
             </div>
@@ -220,6 +256,22 @@ export default function CheckpointForm({ eventId, eventSlug, images }: Props) {
               />
               <p className="text-xs text-gray-500 mt-1">
                 If provided, participants see radio buttons. If blank, they type a free-text answer.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Additional Accepted Answers{' '}
+                <span className="font-normal text-gray-500">(optional — one per line)</span>
+              </label>
+              <textarea
+                name="acceptedAnswers"
+                rows={3}
+                placeholder={"alternate spelling\nabbreviation"}
+                className="w-full rounded border px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black bg-white"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                All answers are case-insensitive. Add alternate spellings or abbreviations here.
               </p>
             </div>
 

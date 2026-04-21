@@ -89,26 +89,34 @@ export async function updateCheckpoint(checkpointId: string, eventId: string, fo
   const type = VALID_CHECKPOINT_TYPES.has(typeRaw) ? (typeRaw as CheckpointType) : undefined
 
   // ContentJson fields
-  const sponsorLogo       = String(formData.get('sponsorLogo')       ?? '').trim() || null
-  const backgroundImage   = String(formData.get('backgroundImage')   ?? '').trim() || null
-  const blurb             = String(formData.get('blurb')             ?? '').trim() || null
-  const prizeInstructions = String(formData.get('prizeInstructions') ?? '').trim() || null
-  const question          = String(formData.get('question')          ?? '').trim() || null
-  const correctAnswer     = String(formData.get('correctAnswer')     ?? '').trim() || null
-  const answerChoicesRaw  = String(formData.get('answerChoices')     ?? '').trim()
-  const answerChoices     = answerChoicesRaw
+  const sponsorLogo        = String(formData.get('sponsorLogo')        ?? '').trim() || null
+  const backgroundImage    = String(formData.get('backgroundImage')    ?? '').trim() || null
+  const blurb              = String(formData.get('blurb')              ?? '').trim() || null
+  const prizeInstructions  = String(formData.get('prizeInstructions')  ?? '').trim() || null
+  const question           = String(formData.get('question')           ?? '').trim() || null
+  const correctAnswer      = String(formData.get('correctAnswer')      ?? '').trim() || null
+  const customTag          = String(formData.get('customTag')          ?? '').trim() || null
+  const answerChoicesRaw   = String(formData.get('answerChoices')      ?? '').trim()
+  const answerChoices      = answerChoicesRaw
     ? answerChoicesRaw.split('\n').map((s) => s.trim()).filter(Boolean)
     : null
-  const questionMode      = formData.get('questionMode') === 'true' ? true : null
+  const acceptedAnswersRaw = String(formData.get('acceptedAnswers')    ?? '').trim()
+  const acceptedAnswers    = acceptedAnswersRaw
+    ? acceptedAnswersRaw.split('\n').map((s) => s.trim()).filter(Boolean)
+    : null
+  const questionMode       = formData.get('questionMode') === 'true' ? true : null
+  const enableQuestion     = formData.get('enableQuestion') === 'true' ? true : null
   // showTag defaults to true — only store false explicitly so the absence means "show"
-  const showTagRaw        = formData.get('showTag')
-  const showTag           = showTagRaw === 'false' ? false : null
+  const showTagRaw         = formData.get('showTag')
+  const showTag            = showTagRaw === 'false' ? false : null
 
   const contentFields = {
     sponsorLogo, backgroundImage, blurb, prizeInstructions,
-    question, correctAnswer,
+    question, correctAnswer, customTag,
     ...(answerChoices && answerChoices.length > 0 ? { answerChoices } : {}),
+    ...(acceptedAnswers && acceptedAnswers.length > 0 ? { acceptedAnswers } : {}),
     ...(questionMode ? { questionMode } : {}),
+    ...(enableQuestion ? { enableQuestion } : {}),
     ...(showTag === false ? { showTag } : {}),
   }
   const hasContent = Object.values(contentFields).some((v) => v !== null)

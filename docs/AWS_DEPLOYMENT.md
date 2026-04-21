@@ -122,9 +122,12 @@ pnpm whitelist-add you@yourdomain.com
 
 ### Build and deploy from WSL
 
+> **Note:** `node_modules` must be installed in WSL (Linux) even if you have them on Windows — native binaries (e.g. `lightningcss`) are platform-specific. Run `pnpm install` from WSL on first use or after a Windows-only install.
+
 ```bash
 cd /path/to/scavenger-hunt
 pnpm install
+pnpm exec prisma generate
 pnpm build
 
 rsync -avz --exclude node_modules --exclude .next/cache \
@@ -135,9 +138,12 @@ rsync -avz --exclude node_modules --exclude .next/cache \
 
 ### Finalise on the server
 
+Order matters — generate the client before running migrations, migrate before starting the app.
+
 ```bash
 cd ~/scavenger-hunt
-pnpm install --prod
+pnpm install --prod --ignore-scripts
+pnpm exec prisma generate
 pnpm exec prisma migrate deploy
 pm2 start "pnpm start" --name scavenger-hunt
 pm2 save
@@ -161,6 +167,17 @@ sudo apt install -y nginx
 sudo systemctl enable nginx
 ```
 
+### Install the Cloudflare Origin Certificate
+
+Before writing the Nginx config you need the SSL certificate files. Get them from Cloudflare (see step 7) and save them on the server:
+
+```bash
+sudo mkdir -p /etc/nginx/ssl
+sudo nano /etc/nginx/ssl/cloudflare.pem   # paste the certificate
+sudo nano /etc/nginx/ssl/cloudflare.key   # paste the private key
+sudo chmod 600 /etc/nginx/ssl/cloudflare.key
+```
+
 ### Create site config
 
 ```bash
@@ -170,9 +187,27 @@ sudo nano /etc/nginx/sites-available/scavenger-hunt
 Paste the following, replacing `yourdomain.com` with your actual domain:
 
 ```nginx
+# Redirect plain HTTP → HTTPS
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name yourdomain.com www.yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name yourdomain.com www.yourdomain.com;
+
+    ssl_certificate     /etc/nginx/ssl/cloudflare.pem;
+    ssl_certificate_key /etc/nginx/ssl/cloudflare.key;
+
+    # Required for image uploads (default Nginx limit is 1MB)
+    client_max_body_size 10M;
+
+    # Serve uploaded files directly from disk (live, no app restart needed)
+    location /uploads/ {
+        alias /home/admin/scavenger-hunt/public/uploads/;
+    }
 
     location / {
         proxy_pass http://localhost:3000;
@@ -191,10 +226,24 @@ server {
 ### Enable and start
 
 ```bash
+sudo rm /etc/nginx/sites-enabled/default
 sudo ln -s /etc/nginx/sites-available/scavenger-hunt /etc/nginx/sites-enabled/
 sudo nginx -t
-sudo systemctl reload nginx
+sudo systemctl start nginx
 ```
+
+### Grant Nginx read access to the uploads directory
+
+Nginx runs as `www-data`. Home directories are `chmod 700` by default, so you must grant traversal permission on each directory in the path:
+
+```bash
+sudo chmod o+x /home/admin
+sudo chmod o+x /home/admin/scavenger-hunt
+sudo chmod o+x /home/admin/scavenger-hunt/public
+sudo chmod o+rx /home/admin/scavenger-hunt/public/uploads
+```
+
+> If a new event's images fail to load, run `sudo chmod o+rx /home/admin/scavenger-hunt/public/uploads/<eventId>` for that subdirectory.
 
 ### AWS security group
 
@@ -202,29 +251,61 @@ Open ports 80 and 443 in your EC2 security group inbound rules (TCP, source 0.0.
 
 ---
 
-## 7. Cloudflare SSL
+## 7. Cloudflare DNS + SSL
 
-If using Cloudflare as your DNS proxy:
+### Add your domain to Cloudflare
 
-1. In Cloudflare DNS, ensure your domain has an **A record** pointing to your EC2 IP with the **orange cloud (proxied)** enabled
-2. Go to **SSL/TLS → Overview** and set the mode to **Full** (not Flexible, not Full Strict)
+If your domain was not registered through Cloudflare Registrar:
+1. Log in to Cloudflare → **Add a site** → enter domain → select Free plan
+2. Cloudflare shows two nameserver hostnames (e.g. `art.ns.cloudflare.com`)
+3. At your registrar, replace the existing nameservers with those two
+4. Wait for DNS propagation (typically ~15 min, up to 24h)
 
-Your app will then be accessible at `https://yourdomain.com`.
+### DNS records
 
-For full end-to-end SSL without Cloudflare:
+In Cloudflare → **DNS → Records → Add record**:
+- Type: `A` | Name: `@` (or a subdomain like `hunt`) | IPv4: `<server public IP>` | Proxy: **Proxied** (orange cloud ✓)
+- Optional `www`: Type: `CNAME` | Name: `www` | Target: `yourdomain.com` | Proxied
 
-```bash
-sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d yourdomain.com
-```
+### Create a Cloudflare Origin Certificate
+
+A Cloudflare Origin Certificate is a free TLS certificate (valid up to 15 years) issued by Cloudflare and trusted by their edge. It enables **Full** SSL mode without needing Let's Encrypt.
+
+1. Cloudflare dashboard → your domain → **SSL/TLS → Origin Server**
+2. Click **Create Certificate**
+3. Leave defaults (RSA, covers `yourdomain.com` and `*.yourdomain.com`, 15-year validity)
+4. Click **Create**
+5. Copy the **Origin Certificate** → paste into `/etc/nginx/ssl/cloudflare.pem` on the server
+6. Copy the **Private Key** → paste into `/etc/nginx/ssl/cloudflare.key` on the server
+
+> The private key is shown only once. Save it immediately.
+
+### SSL/TLS mode
+
+In Cloudflare → **SSL/TLS → Overview** → set mode to **Full**:
+- **Full** — Cloudflare connects to your origin on port 443 using the Origin Certificate. Required when Nginx listens on 443.
+- **Not Flexible** — Cloudflare would connect to origin on port 80; does not work with the HTTPS Nginx config above.
+- **Not Full Strict** — requires a publicly trusted CA cert (e.g. Let's Encrypt) on the origin; not needed here.
+
+### Always Use HTTPS
+
+In Cloudflare → **SSL/TLS → Edge Certificates** → enable **Always Use HTTPS**.
+
+Cloudflare redirects all `http://` requests to `https://` at the edge before they reach your server.
+
+### AWS security group
+
+Open ports **80** and **443** in your EC2 security group inbound rules (TCP, source 0.0.0.0/0). Cloudflare connects to origin on port 443 when using Full mode.
 
 ---
 
 ## 8. Subsequent Deploys
 
 ```bash
-# WSL — build and ship
+# WSL — install (for Linux native binaries), generate client, build, ship
 cd /path/to/scavenger-hunt
+pnpm install
+pnpm exec prisma generate
 pnpm build
 
 rsync -avz --exclude node_modules --exclude .next/cache \
@@ -232,8 +313,8 @@ rsync -avz --exclude node_modules --exclude .next/cache \
   .next package.json pnpm-lock.yaml prisma public src \
   admin@your-ec2-ip:~/scavenger-hunt/
 
-# Server — install, migrate, restart
-pnpm install --prod && pnpm exec prisma migrate deploy && pm2 restart scavenger-hunt
+# Server — install, generate client, migrate, restart (order matters)
+pnpm install --prod --ignore-scripts && pnpm exec prisma generate && pnpm exec prisma migrate deploy && pm2 restart scavenger-hunt
 ```
 
 ---
@@ -277,3 +358,12 @@ The instance is out of memory. Add or increase swap space (see step 1).
 
 **Nginx fails to start — address already in use**
 Another process is on port 80. Run `sudo fuser -k 80/tcp` then retry.
+
+**`Cannot find module '../lightningcss.linux-x64-gnu.node'` during WSL build**
+The `node_modules` were installed on Windows and lack the Linux native binaries. Run `pnpm install` from within WSL to fetch the correct platform binaries, then rebuild.
+
+**`Unknown argument 'order'` (or similar) — Prisma runtime validation error**
+The Prisma client on the server is out of sync with the schema. After deploying new code that changes the schema, always run `pnpm exec prisma generate` on the server before restarting the app. Running `migrate deploy` alone is not enough — the client must also be regenerated.
+
+**Cloudflare 521 — Web server is down**
+Cloudflare cannot reach the origin on port 443. Check: (1) Nginx is running (`sudo systemctl status nginx`), (2) port 443 is open in the EC2 security group, (3) the SSL certificate and key files exist and are readable, (4) `sudo nginx -t` passes with no errors, (5) SSL/TLS mode in Cloudflare is set to **Full** (not Flexible).

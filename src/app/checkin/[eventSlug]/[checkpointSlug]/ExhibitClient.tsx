@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { submitAnswer, type AnswerStatus } from './actions'
+import { submitAnswer, recordConversion, type AnswerStatus } from './actions'
+
+const COUNTDOWN_SECONDS = 30
 
 type Props = {
   eventId: string
@@ -14,8 +16,12 @@ type Props = {
   question: string
   correctAnswer: string
   answerChoices: string[]   // empty → free-text input
+  acceptedAnswers: string[] // additional correct answers (case-insensitive)
   blurb: string | null
   backgroundImage: string | null
+  sponsorLogo: string | null
+  fallbackUrl: string | null
+  conversionBonusPoints: number
   isPreview?: boolean
 }
 
@@ -29,16 +35,48 @@ export default function ExhibitClient({
   question,
   correctAnswer,
   answerChoices,
+  acceptedAnswers,
   blurb,
   backgroundImage,
+  sponsorLogo,
+  fallbackUrl,
+  conversionBonusPoints,
   isPreview = false,
 }: Props) {
   const [answer, setAnswer] = useState('')
   const [status, setStatus] = useState<AnswerStatus | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
+  const [redirected, setRedirected] = useState(false)
 
   const isMultiChoice = answerChoices.length > 0
   const solved = status === 'correct' || status === 'already-correct'
+
+  // Countdown + redirect after correct answer, only when a fallbackUrl is set
+  useEffect(() => {
+    if (!solved || !fallbackUrl || isPreview) return
+    const interval = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(interval)
+          setRedirected(true)
+          recordConversion(eventId, checkpointId, 'AUTO').finally(() => {
+            window.location.href = fallbackUrl
+          })
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [solved, fallbackUrl, isPreview, eventId, checkpointId])
+
+  async function goNow() {
+    if (isPreview || !fallbackUrl) return
+    setRedirected(true)
+    await recordConversion(eventId, checkpointId, 'MANUAL')
+    window.location.href = fallbackUrl
+  }
 
   const bgStyle = backgroundImage
     ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -48,7 +86,7 @@ export default function ExhibitClient({
     e.preventDefault()
     if (isPreview || !answer.trim() || submitting) return
     setSubmitting(true)
-    const result = await submitAnswer(eventId, checkpointId, answer, correctAnswer)
+    const result = await submitAnswer(eventId, checkpointId, answer, correctAnswer, acceptedAnswers)
     setStatus(result)
     setSubmitting(false)
     if (result === 'incorrect') setAnswer(isMultiChoice ? '' : answer) // keep text for retry
@@ -68,7 +106,14 @@ export default function ExhibitClient({
               <img src={eventLogoUrl} alt={eventName} className="h-10 object-contain mb-1" />
             )}
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{eventName}</p>
-            <h1 className="text-xl font-bold mt-1">{checkpointName}</h1>
+
+            {/* Sponsor logo — shown in place of the checkpoint name when present */}
+            {sponsorLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={sponsorLogo} alt={checkpointName} className="h-16 object-contain mt-1" />
+            ) : (
+              <h1 className="text-xl font-bold mt-1">{checkpointName}</h1>
+            )}
           </div>
 
           {/* Preview banner */}
@@ -99,9 +144,45 @@ export default function ExhibitClient({
                     : 'Points have been added to your score.'}
                 </p>
               </div>
+
+              {/* Redirect splash — shown when a sponsor URL is set */}
+              {fallbackUrl ? (
+                redirected ? (
+                  <p className="text-sm text-gray-500">Redirecting…</p>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-4xl font-mono font-bold text-black">
+                        {isPreview ? COUNTDOWN_SECONDS : countdown}
+                      </span>
+                      <span className="text-xs text-gray-400">seconds until redirect</span>
+                    </div>
+                    <button
+                      onClick={goNow}
+                      disabled={isPreview}
+                      className="w-full rounded-lg bg-black px-4 py-3 text-white font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Visit {checkpointName} now →
+                      {conversionBonusPoints > 0 && (
+                        <span className="ml-2 text-xs font-normal opacity-80">
+                          +{conversionBonusPoints} bonus pts!
+                        </span>
+                      )}
+                    </button>
+                  </>
+                )
+              ) : (
+                <Link
+                  href={`/event/${eventSlug}/home`}
+                  className="w-full rounded-lg bg-black px-4 py-3 text-white font-semibold text-center hover:bg-gray-800 transition-colors"
+                >
+                  Return to hunt
+                </Link>
+              )}
+
               <Link
                 href={`/event/${eventSlug}/home`}
-                className="w-full rounded-lg bg-black px-4 py-3 text-white font-semibold text-center hover:bg-gray-800 transition-colors"
+                className="text-sm text-gray-400 underline hover:text-gray-600"
               >
                 Return to hunt
               </Link>

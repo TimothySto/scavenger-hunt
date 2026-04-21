@@ -85,7 +85,8 @@ export async function submitAnswer(
   eventId: string,
   checkpointId: string,
   answer: string,
-  correctAnswer: string
+  correctAnswer: string,
+  acceptedAnswers: string[] = []
 ): Promise<AnswerStatus> {
   const cookieStore = await cookies()
   const cookieId = cookieStore.get(SESSION_COOKIE_NAME)?.value
@@ -99,7 +100,9 @@ export async function submitAnswer(
   if (session.completedAt) return 'hunt-ended'
 
   const normalize = (s: string) => s.trim().toLowerCase()
-  if (normalize(answer) !== normalize(correctAnswer)) return 'incorrect'
+  const normalizedAnswer = normalize(answer)
+  const allAccepted = [correctAnswer, ...acceptedAnswers]
+  if (!allAccepted.some((a) => normalize(a) === normalizedAnswer)) return 'incorrect'
 
   try {
     await db.checkIn.create({

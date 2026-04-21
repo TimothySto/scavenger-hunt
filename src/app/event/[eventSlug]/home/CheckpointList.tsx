@@ -124,7 +124,7 @@ export default function CheckpointList({ checkpoints, completedIds: completedArr
               {/* Optional sponsor logo */}
               {sponsorLogo && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={sponsorLogo} alt="" className="h-7 w-7 object-contain flex-shrink-0 rounded" />
+                <img src={sponsorLogo} alt="" className="h-10 w-auto max-w-[5rem] object-contain flex-shrink-0 rounded" />
               )}
 
               {/* Name + type badge */}
@@ -133,7 +133,7 @@ export default function CheckpointList({ checkpoints, completedIds: completedArr
                   <span className="event-body font-semibold">{cp.name}</span>
                   {!hideTag && (
                     <span className="text-xs text-gray-400 bg-gray-100 rounded px-1.5 py-0.5">
-                      {typeLabel[cp.type] ?? cp.type}
+                      {(cp.contentJson?.customTag as string | undefined) ?? typeLabel[cp.type] ?? cp.type}
                     </span>
                   )}
                 </div>

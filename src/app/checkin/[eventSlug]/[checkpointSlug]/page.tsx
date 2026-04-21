@@ -23,20 +23,26 @@ type CheckpointContent = {
   question?: string
   correctAnswer?: string
   answerChoices?: string[]
+  acceptedAnswers?: string[]
+  enableQuestion?: boolean
 }
 
 function parseContent(raw: unknown): CheckpointContent {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
   const obj = raw as Record<string, unknown>
   return {
-    sponsorLogo:       typeof obj.sponsorLogo       === 'string' ? obj.sponsorLogo       : undefined,
-    backgroundImage:   typeof obj.backgroundImage   === 'string' ? obj.backgroundImage   : undefined,
-    blurb:             typeof obj.blurb             === 'string' ? obj.blurb             : undefined,
-    prizeInstructions: typeof obj.prizeInstructions === 'string' ? obj.prizeInstructions : undefined,
-    question:          typeof obj.question          === 'string' ? obj.question          : undefined,
-    correctAnswer:     typeof obj.correctAnswer     === 'string' ? obj.correctAnswer     : undefined,
-    answerChoices:     Array.isArray(obj.answerChoices)
+    sponsorLogo:      typeof obj.sponsorLogo      === 'string'  ? obj.sponsorLogo      : undefined,
+    backgroundImage:  typeof obj.backgroundImage  === 'string'  ? obj.backgroundImage  : undefined,
+    blurb:            typeof obj.blurb            === 'string'  ? obj.blurb            : undefined,
+    prizeInstructions:typeof obj.prizeInstructions=== 'string'  ? obj.prizeInstructions: undefined,
+    question:         typeof obj.question         === 'string'  ? obj.question         : undefined,
+    correctAnswer:    typeof obj.correctAnswer    === 'string'  ? obj.correctAnswer    : undefined,
+    enableQuestion:   typeof obj.enableQuestion   === 'boolean' ? obj.enableQuestion   : undefined,
+    answerChoices:    Array.isArray(obj.answerChoices)
       ? (obj.answerChoices as unknown[]).filter((c): c is string => typeof c === 'string')
+      : undefined,
+    acceptedAnswers:  Array.isArray(obj.acceptedAnswers)
+      ? (obj.acceptedAnswers as unknown[]).filter((c): c is string => typeof c === 'string')
       : undefined,
   }
 }
@@ -122,11 +128,13 @@ export default async function CheckinPage({ params, searchParams }: PageProps) {
     )
   }
 
-  // EXHIBIT_QUESTION type always uses the question mechanic.
-  // Plain EXHIBIT falls through to it when question + correctAnswer are configured.
+  // EXHIBIT_QUESTION always uses the question mechanic.
+  // Plain EXHIBIT falls through when question + correctAnswer are set.
+  // ONSITE_SPONSOR uses it when enableQuestion is toggled on and question + correctAnswer are set.
   const isQuestionCheckpoint =
     checkpoint.type === 'EXHIBIT_QUESTION' ||
-    (checkpoint.type === 'EXHIBIT' && !!content.question && !!content.correctAnswer)
+    (checkpoint.type === 'EXHIBIT' && !!content.question && !!content.correctAnswer) ||
+    (checkpoint.type === 'ONSITE_SPONSOR' && !!content.enableQuestion && !!content.question && !!content.correctAnswer)
 
   if (isQuestionCheckpoint && content.question && content.correctAnswer) {
     return (
@@ -140,8 +148,12 @@ export default async function CheckinPage({ params, searchParams }: PageProps) {
         question={content.question}
         correctAnswer={content.correctAnswer}
         answerChoices={content.answerChoices ?? []}
+        acceptedAnswers={content.acceptedAnswers ?? []}
         blurb={content.blurb ?? null}
         backgroundImage={content.backgroundImage ?? null}
+        sponsorLogo={content.sponsorLogo ?? null}
+        fallbackUrl={checkpoint.fallbackUrl ?? null}
+        conversionBonusPoints={event.conversionBonusPoints}
         isPreview={isPreview}
       />
     )
