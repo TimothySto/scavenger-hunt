@@ -28,7 +28,28 @@
       "contentJson": {
         "sponsorLogo": "https://www.acmecorp.example.com/logo.png",
         "backgroundImage": "https://www.acmecorp.example.com/booth-bg.jpg",
-        "blurb": "Thanks for stopping by the Acme Corp booth! We build the best widgets in the business.",
+        "blurb": "Thanks for stopping by the Acme Corp booth!",
+        "customTag": "Partner",
+        "showTag": true
+      }
+    },
+    {
+      "_template": "ONSITE_SPONSOR — with question",
+      "name": "Acme Corp Quiz",
+      "slug": "acme-corp-quiz",
+      "type": "ONSITE_SPONSOR",
+      "points": 10,
+      "clue": "Find us near the main entrance.",
+      "fallbackUrl": "https://www.acmecorp.example.com",
+      "isActive": true,
+      "contentJson": {
+        "sponsorLogo": "https://www.acmecorp.example.com/logo.png",
+        "blurb": "Answer our question to earn points, then check out our site!",
+        "enableQuestion": true,
+        "question": "What product is Acme Corp best known for?",
+        "correctAnswer": "widgets",
+        "acceptedAnswers": ["widget", "the widget"],
+        "customTag": "Partner",
         "showTag": true
       }
     },
@@ -93,6 +114,7 @@
         "blurb": "Read the exhibit panel, then answer the question below.",
         "question": "How many planets are in our solar system?",
         "correctAnswer": "8",
+        "acceptedAnswers": ["eight"],
         "answerChoices": ["6", "7", "8", "9"],
         "questionMode": true,
         "showTag": true
@@ -124,7 +146,9 @@
         "blurb": "Test your knowledge of our venue's history.",
         "question": "In what year was this venue first opened to the public?",
         "correctAnswer": "1987",
+        "acceptedAnswers": ["'87", "87"],
         "answerChoices": ["1972", "1981", "1987", "1995"],
+        "customTag": "Interactive",
         "showTag": true
       }
     },
@@ -170,12 +194,11 @@
       "points": 0,
       "isActive": true,
       "contentJson": {
-        "prizeInstructions": "Show this screen to a volunteer at the prize desk. Prizes are awarded based on your final score tier. Top 3 scores receive a grand prize!",
+        "prizeInstructions": "Show this screen to a volunteer at the prize desk. Prizes are awarded based on your final score tier.",
         "showTag": false
       }
     },
 
-   
 
     {
       "_template": "EVENT_GENERAL — minimal",

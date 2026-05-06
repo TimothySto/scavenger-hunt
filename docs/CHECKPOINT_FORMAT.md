@@ -66,6 +66,8 @@ A sponsor with a physical table at the event. A QR code is placed at the table. 
 3. After a short delay they are automatically redirected to `fallbackUrl` (AUTO conversion logged)
 4. A manual "Visit website" button is also shown as a backup (MANUAL conversion if clicked)
 
+**Optional question mechanic:** Set `enableQuestion: true` in `contentJson` and populate `question` and `correctAnswer` to require hunters to answer correctly before earning points. If `fallbackUrl` is also set, the sponsor redirect splash is shown after a correct answer.
+
 **Typical use:** Trade show sponsors, exhibitor tables, booth check-ins.
 
 ---
@@ -131,10 +133,13 @@ All `contentJson` fields are optional unless noted. Unknown fields are stored bu
 | `backgroundImage` | string (URL) | All | Full-bleed background image for the check-in page |
 | `blurb` | string | All | Short paragraph shown on the check-in page below the logo |
 | `prizeInstructions` | string | `PRIZE_REDEMPTION` | Instructions shown on the prize redemption page |
-| `question` | string | `EXHIBIT`, `EXHIBIT_QUESTION` | Question text displayed to the hunter |
-| `correctAnswer` | string | `EXHIBIT`, `EXHIBIT_QUESTION` | Accepted answer. Comparison is **case-insensitive and whitespace-trimmed** |
-| `answerChoices` | string[] | `EXHIBIT`, `EXHIBIT_QUESTION` | If provided, shows radio buttons. If omitted, shows a free-text input |
+| `question` | string | `EXHIBIT`, `EXHIBIT_QUESTION`, `ONSITE_SPONSOR` | Question text displayed to the hunter |
+| `correctAnswer` | string | `EXHIBIT`, `EXHIBIT_QUESTION`, `ONSITE_SPONSOR` | Accepted answer. Comparison is **case-insensitive and whitespace-trimmed** |
+| `acceptedAnswers` | string[] | `EXHIBIT`, `EXHIBIT_QUESTION`, `ONSITE_SPONSOR` | Additional accepted answers (alternate spellings, abbreviations). Same case-insensitive matching as `correctAnswer` |
+| `answerChoices` | string[] | `EXHIBIT`, `EXHIBIT_QUESTION`, `ONSITE_SPONSOR` | If provided, shows radio buttons. If omitted, shows a free-text input |
 | `questionMode` | boolean | `EXHIBIT` | `true` — show a direct homepage link so hunters can answer without scanning the QR code |
+| `enableQuestion` | boolean | `ONSITE_SPONSOR` | `true` — require the hunter to answer a question when scanning this checkpoint's QR code. Populate `question` and `correctAnswer` alongside this flag |
+| `customTag` | string | All | Overrides the type badge label shown on the participant homepage (e.g. `"Partner"`, `"Interactive"`) |
 | `showTag` | boolean | All | `false` — hide the type badge on the participant homepage. Defaults to `true` (shown) |
 
 ---
@@ -342,5 +347,8 @@ The following is a minimal but complete import payload that creates one of each 
 - **QR code values are auto-generated** as `/checkin/{eventSlug}/{slug}` if you leave `qrCodeValue` blank. On re-import, include the `qrCodeValue` from the first import to update rather than duplicate.
 - **`fallbackUrl` drives conversion tracking** — only checkpoints with a `fallbackUrl` show conversion columns in the checkpoint dashboard.
 - **`correctAnswer` matching is forgiving** — leading/trailing whitespace is stripped and comparison is case-insensitive, so `"1969"`, `" 1969 "`, and `"1969 "` all match.
+- **`acceptedAnswers`** extends `correctAnswer` with alternate spellings or abbreviations. All entries use the same case-insensitive, whitespace-trimmed comparison. Useful when a question has more than one reasonable phrasing (e.g. `"eight"` and `"8"`).
+- **`enableQuestion` on `ONSITE_SPONSOR`** — when set to `true`, the hunter must answer correctly before earning points. If `fallbackUrl` is also set, the sponsor redirect splash is shown after a correct answer (AUTO conversion logged).
+- **`customTag`** replaces the default type label (e.g. "Sponsor", "Exhibit") with any string you choose. Combine with `showTag: true` to display it, or `showTag: false` to hide the badge entirely.
 - **`showTag: false`** is useful for event-infrastructure checkpoints (welcome table, prize desk) where the type badge would feel out of place to participants.
-- **The `_template` key** used in `checkpoint-examples.json` is ignored by the importer and is just a human-readable label. You can leave it in or remove it freely.
+- **The `_template` key** used in `example-event.json` is ignored by the importer and is just a human-readable label. You can leave it in or remove it freely.
